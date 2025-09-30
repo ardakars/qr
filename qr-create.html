@@ -17,16 +17,19 @@
 </head>
 <body>
   <h2>Toplu QR Üretici</h2>
-  <button onclick="generateAllQR()">Tüm QR’ları Üret</button>
+  <button id="generateBtn" disabled>Tüm QR’ları Üret</button>
 
   <div id="qrList"></div>
 
   <script>
     let names = [];
+
+    // İsimleri yükle
     fetch('names.txt')
       .then(response => response.text())
       .then(text => {
         names = text.split('\n').map(s => s.trim()).filter(s => s.length>0);
+        document.getElementById('generateBtn').disabled = false; // isimler yüklendiğinde butonu aktif et
       });
 
     function generateAllQR() {
@@ -56,6 +59,8 @@
         qrListDiv.appendChild(container);
       });
     }
+
+    document.getElementById('generateBtn').addEventListener('click', generateAllQR);
   </script>
 </body>
 </html>
