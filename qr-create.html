@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Toplu QR ve Mail Gönderme</title>
+  <title>Toplu QR ve Mail Hazırlama</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
   <style>
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h2>Toplu QR ve Mail Gönderme</h2>
+  <h2>Toplu QR ve Mail Hazırlama</h2>
   <button id="generateBtn" disabled>Tüm QR’ları Üret</button>
 
   <div id="qrList"></div>
@@ -56,21 +56,39 @@
         p.textContent = name;
         container.appendChild(p);
 
-        new QRCode(qrDiv, {
+        // QR oluştur
+        const qr = new QRCode(qrDiv, {
           text: encodeURIComponent(name),
           width: 200,
           height: 200,
           correctLevel: QRCode.CorrectLevel.H
         });
 
-        // Mail Gönder butonu
+        // PNG İndir butonu
+        const downloadBtn = document.createElement("button");
+        downloadBtn.textContent = "PNG İndir";
+        downloadBtn.onclick = () => {
+          const img = qrDiv.querySelector('img') || qrDiv.querySelector('canvas');
+          let url;
+          if(img.tagName === 'IMG') {
+            url = img.src;
+          } else {
+            url = img.toDataURL("image/png");
+          }
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = name.replace(/\s+/g,'_') + '.png';
+          a.click();
+        };
+        container.appendChild(downloadBtn);
+
+        // Mail Aç butonu
         if(email) {
           const mailBtn = document.createElement("button");
-          const qrLink = window.location.origin + '/#'; // QR link placeholder
-          mailBtn.textContent = "Mail Gönder";
+          mailBtn.textContent = "Mail Aç";
           mailBtn.onclick = () => {
             const subject = encodeURIComponent("QR Kodunuz");
-            const body = encodeURIComponent(`Merhaba ${name},\nQR kodunuz: ${qrLink}`);
+            const body = encodeURIComponent(`Merhaba ${name},\nLütfen eklediğim QR kodunu mailinize ekleyin.`);
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
           };
           container.appendChild(mailBtn);
