@@ -22,18 +22,19 @@
   <div id="qrList"></div>
 
   <script>
-    let namesData = []; // format: ["ahmet hasd ; 8769@gmail.com", "mehmet gasa ; 123@gmail.com", ...]
     let names = [];
     let emails = [];
 
     fetch('names.txt')
       .then(res => res.text())
       .then(text => {
-        namesData = text.split('\n').map(s => s.trim()).filter(s => s.length>0);
-        namesData.forEach(item => {
-          const parts = item.split(';');
-          names.push(parts[0].trim());
-          emails.push(parts[1] ? parts[1].trim() : '');
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length>0);
+        lines.forEach(line => {
+          const parts = line.split(';');
+          const name = parts[0].trim();
+          const email = parts[1] ? parts[1].trim() : '';
+          names.push(name);
+          emails.push(email);
         });
         document.getElementById('generateBtn').disabled = false;
       });
