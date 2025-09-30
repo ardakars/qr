@@ -38,7 +38,7 @@
   <p id="result"></p>
 
   <script>
-    // --- İsim Listesi ---
+    // --- 1. İsim Listesi ---
     const names = ["Ahmet", "Mehmet", "Ayşe", "Fatma"];
     const nameSelect = document.getElementById("nameSelect");
     names.forEach(n => {
@@ -48,21 +48,22 @@
       nameSelect.appendChild(opt);
     });
 
-    // --- QR Kod Üretme ---
+    // --- 2. QR Kod Üretme (Türkçe karakter desteği) ---
     function generateQR() {
       const name = nameSelect.value;
       document.getElementById("qrcode").innerHTML = "";
       new QRCode(document.getElementById("qrcode"), {
-        text: name,
+        text: encodeURIComponent(name),
         width: 200,
-        height: 200
+        height: 200,
+        correctLevel: QRCode.CorrectLevel.H
       });
     }
 
-    // --- LocalStorage ile okutma sayıları ---
+    // --- 3. LocalStorage ile okutma sayıları ---
     let readCounts = JSON.parse(localStorage.getItem("readCounts")) || {};
 
-    // --- QR Okuma ---
+    // --- 4. QR Okuma ---
     let html5QrCode;
     function startScanner() {
       const reader = document.getElementById("reader");
@@ -73,18 +74,19 @@
         { facingMode: "environment" }, // sadece arka kamera
         { fps: 10, qrbox: 250 },
         decodedText => {
+          const text = decodeURIComponent(decodedText);
           const resultEl = document.getElementById("result");
 
-          if (!names.includes(decodedText)) {
-            resultEl.innerHTML = `<span class="error">⚠️ ${decodedText} listede yok</span>`;
+          if (!names.includes(text)) {
+            resultEl.innerHTML = `<span class="error">⚠️ ${text} listede yok</span>`;
           } else {
-            readCounts[decodedText] = (readCounts[decodedText] || 0) + 1;
+            readCounts[text] = (readCounts[text] || 0) + 1;
             localStorage.setItem("readCounts", JSON.stringify(readCounts));
 
-            if (readCounts[decodedText] === 1) {
-              resultEl.innerHTML = `<span class="ok">✅ ${decodedText} listede var</span>`;
+            if (readCounts[text] === 1) {
+              resultEl.innerHTML = `<span class="ok">✅ ${text} listede var</span>`;
             } else {
-              resultEl.innerHTML = `<span class="warning">⚠️ ${decodedText}'in ${readCounts[decodedText]}. okutuşu</span>`;
+              resultEl.innerHTML = `<span class="warning">⚠️ ${text}'in ${readCounts[text]}. okutuşu</span>`;
             }
           }
 
