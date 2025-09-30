@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Toplu QR ve Mail</title>
+  <title>Toplu QR ve Mail Gönderme</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
   <style>
@@ -22,17 +22,16 @@
   <div id="qrList"></div>
 
   <script>
-    let namesData = []; // format: ["ahmet hasd - asd@asda.com", "mehmet gasa - 1e12@ter.com", ...]
-    let names = []; // sadece isim kısmı
-    let emails = []; // sadece email kısmı
+    let namesData = []; // format: ["ahmet hasd ; 8769@gmail.com", "mehmet gasa ; 123@gmail.com", ...]
+    let names = [];
+    let emails = [];
 
     fetch('names.txt')
       .then(res => res.text())
       .then(text => {
-        // her satır "isim soyad - email" formatında
         namesData = text.split('\n').map(s => s.trim()).filter(s => s.length>0);
         namesData.forEach(item => {
-          const parts = item.split(' - ');
+          const parts = item.split(';');
           names.push(parts[0].trim());
           emails.push(parts[1] ? parts[1].trim() : '');
         });
@@ -66,7 +65,7 @@
         // Mail Gönder butonu
         if(email) {
           const mailBtn = document.createElement("button");
-          const qrLink = window.location.origin + '/#'; // statik sayfa, istersen her QR için ayrı link oluştur
+          const qrLink = window.location.origin + '/#'; // QR link placeholder
           mailBtn.textContent = "Mail Gönder";
           mailBtn.onclick = () => {
             const subject = encodeURIComponent("QR Kodunuz");
