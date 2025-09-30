@@ -29,11 +29,12 @@
   <div id="reader"></div>
   <p id="result"></p>
 
+  <p>Toplam okuma: <span id="scanCount">0</span></p>
+
   <script>
-    // --- 1. İsim Listesi ---
+    // --- İsim Listesi ---
     const names = ["Ahmet", "Mehmet", "Ayşe", "Fatma"];
     const nameSelect = document.getElementById("nameSelect");
-
     names.forEach(n => {
       const opt = document.createElement("option");
       opt.value = n;
@@ -41,7 +42,7 @@
       nameSelect.appendChild(opt);
     });
 
-    // --- 2. QR Kod Üretme ---
+    // --- QR Kod Üretme ---
     function generateQR() {
       const name = nameSelect.value;
       document.getElementById("qrcode").innerHTML = "";
@@ -52,19 +53,23 @@
       });
     }
 
-    // --- 3. QR Kod Okuma ---
+    // --- Sayaç ---
+    let scanCounter = parseInt(localStorage.getItem("scanCounter")) || 0;
+    document.getElementById("scanCount").textContent = scanCounter;
+
+    // --- QR Okuma ---
     let html5QrCode;
     function startScanner() {
       const reader = document.getElementById("reader");
-      reader.style.display = "block"; // görünür yap
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
-      }
+      reader.style.display = "block";
+      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
       Html5Qrcode.getCameras().then(devices => {
         if (devices && devices.length) {
+          const cameraId = devices.length > 1 ? devices[1].id : devices[0].id;
+
           html5QrCode.start(
-            { facingMode: "environment" }, // arka kamera
+            { deviceId: { exact: cameraId } },
             { fps: 10, qrbox: 250 },
             decodedText => {
               const resultEl = document.getElementById("result");
@@ -73,10 +78,15 @@
               } else {
                 resultEl.innerHTML = `<span class="error">⚠️ ${decodedText} listede yok</span>`;
               }
-              // okuduktan sonra kamerayı durdur
+
+              // Sayaç arttır ve localStorage kaydet
+              scanCounter++;
+              localStorage.setItem("scanCounter", scanCounter);
+              document.getElementById("scanCount").textContent = scanCounter;
+
               html5QrCode.stop();
             },
-            error => { /* başarısız okuma sessiz geçilir */ }
+            error => { /* sessiz geç */ }
           );
         }
       });
@@ -84,5 +94,3 @@
   </script>
 </body>
 </html>
-
-
