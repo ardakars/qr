@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>QR İsim Kontrol</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #qrcode { margin: 20px auto; }
+    #reader { width: 300px; margin: 20px auto; display: none; }
+    .ok { color: green; font-weight: bold; }
+    .error { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>QR Kod Üret ve Kontrol Et</h2>
+
+  <div>
+    <label>İsim seç:</label>
+    <select id="nameSelect"></select>
+    <button onclick="generateQR()">QR Üret</button>
+  </div>
+
+  <div id="qrcode"></div>
+
+  <h3>QR Okut</h3>
+  <button onclick="startScanner()">📷 Kamerayı Aç</button>
+  <div id="reader"></div>
+  <p id="result"></p>
+
+  <script>
+    // --- 1. İsim Listesi ---
+    const names = ["Ahmet", "Mehmet", "Ayşe", "Fatma"];
+    const nameSelect = document.getElementById("nameSelect");
+
+    names.forEach(n => {
+      const opt = document.createElement("option");
+      opt.value = n;
+      opt.textContent = n;
+      nameSelect.appendChild(opt);
+    });
+
+    // --- 2. QR Kod Üretme ---
+    function generateQR() {
+      const name = nameSelect.value;
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), {
+        text: name,
+        width: 200,
+        height: 200
+      });
+    }
+
+    // --- 3. QR Kod Okuma ---
+    let html5QrCode;
+    function startScanner() {
+      const reader = document.getElementById("reader");
+      reader.style.display = "block"; // görünür yap
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+          html5QrCode.start(
+            { facingMode: "environment" }, // arka kamera
+            { fps: 10, qrbox: 250 },
+            decodedText => {
+              const resultEl = document.getElementById("result");
+              if (names.includes(decodedText)) {
+                resultEl.innerHTML = `<span class="ok">✅ ${decodedText} listede var</span>`;
+              } else {
+                resultEl.innerHTML = `<span class="error">⚠️ ${decodedText} listede yok</span>`;
+              }
+              // okuduktan sonra kamerayı durdur
+              html5QrCode.stop();
+            },
+            error => { /* başarısız okuma sessiz geçilir */ }
+          );
+        }
+      });
+    }
+  </script>
+</body>
+</html>
