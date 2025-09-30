@@ -30,8 +30,12 @@
         names = text.split('\n').map(s => s.trim()).filter(s => s.length>0);
       });
 
+    // Okutma sayısını tutan nesne
     let readCounts = JSON.parse(localStorage.getItem("readCounts")) || {};
     let html5QrCode;
+
+    // Okutanlar listesi için anahtar
+    const OKUTAN_KEY = 'okutanlarListesi';
 
     function startScanner() {
       const reader = document.getElementById("reader");
@@ -42,14 +46,21 @@
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         decodedText => {
-          const text = decodeURIComponent(decodedText);
+          const text = decodeURIComponent(decodedText.trim());
           const resultEl = document.getElementById("result");
 
           if (!names.includes(text)) {
             resultEl.innerHTML = `<span class="error">⚠️ ${text} listede yok</span>`;
           } else {
+            // Okutma sayısını güncelle
             readCounts[text] = (readCounts[text] || 0) + 1;
             localStorage.setItem("readCounts", JSON.stringify(readCounts));
+
+            // Okutanlar listesine ekle
+            let okutanlar = JSON.parse(localStorage.getItem(OKUTAN_KEY) || "[]");
+            const now = new Date().toLocaleString('tr-TR', { hour12: false });
+            okutanlar.push({ name: text, date: now });
+            localStorage.setItem(OKUTAN_KEY, JSON.stringify(okutanlar));
 
             if (readCounts[text] === 1) {
               resultEl.innerHTML = `<span class="ok">✅ ${text} listede var</span>`;
