@@ -51,30 +51,31 @@
     }
 
     function exportToExcel() {
-      let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      if (!Array.isArray(data) || data.length === 0) {
-        alert("Export edilecek kayıt yok!");
-        return;
-      }
+  let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  if (!Array.isArray(data) || data.length === 0) {
+    alert("Export edilecek kayıt yok!");
+    return;
+  }
 
-      // CSV formatı
-      let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "Sıra,İsim,Tarih & Saat\n";
-      data.forEach((item, idx) => {
-        const row = `${idx + 1},"${item.name}","${item.date}"\n`;
-        csvContent += row;
-      });
+  // UTF-8 BOM ekle
+  let csvContent = "\uFEFF"; // BOM
+  csvContent += "Sıra,İsim,Tarih & Saat\n";
+  data.forEach((item, idx) => {
+    const row = `${idx + 1},"${item.name}","${item.date}"\n`;
+    csvContent += row;
+  });
 
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      const now = new Date();
-      const timestamp = now.toISOString().slice(0,19).replace(/[:T]/g,"-");
-      link.setAttribute("download", `okutanlar-${timestamp}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const now = new Date();
+  const timestamp = now.toISOString().slice(0,19).replace(/[:T]/g,"-");
+  link.setAttribute("download", `okutanlar-${timestamp}.csv`);
+  link.href = URL.createObjectURL(blob);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 
     document.getElementById("clearBtn").addEventListener("click", () => {
       if(confirm("Tüm kayıtları silmek istediğinize emin misiniz?")) {
@@ -90,3 +91,4 @@
   </script>
 </body>
 </html>
+
