@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Okutanlar Listesi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    button { padding: 5px 10px; margin-top: 15px; cursor: pointer; }
+    @media (max-width: 480px) {
+      table, th, td { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <h2>Okutanlar Listesi</h2>
+
+  <button id="clearBtn">Tüm Kayıtları Temizle</button>
+
+  <table id="okutanTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>İsim</th>
+        <th>Tarih & Saat</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Satırlar buraya gelecek -->
+    </tbody>
+  </table>
+
+  <script>
+    // LocalStorage anahtar
+    const STORAGE_KEY = 'okutanlarListesi';
+
+    // Tablo ve verileri al
+    const tableBody = document.querySelector("#okutanTable tbody");
+
+    function loadList() {
+      tableBody.innerHTML = "";
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      data.forEach((item, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${item.name}</td>
+          <td>${item.date}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // Yeni okutulan birini eklemek için kullanılacak
+    function addOkutan(name) {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const now = new Date();
+      const formatted = now.toLocaleString('tr-TR', { hour12: false });
+      data.push({ name: name, date: formatted });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      loadList();
+    }
+
+    // Temizle butonu
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if(confirm("Tüm kayıtları silmek istediğinize emin misiniz?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        loadList();
+      }
+    });
+
+    // Sayfa yüklendiğinde tabloyu yükle
+    loadList();
+
+    // Test: addOkutan("Ahmet Hasd"); // Bu fonksiyonla yeni okutulan kişi eklenir
+  </script>
+</body>
+</html>
