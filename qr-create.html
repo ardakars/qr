@@ -10,10 +10,10 @@
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 20px; margin: 0; }
     button { font-size: 1em; padding: 5px 10px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; }
-    .qr-container { margin: 15px auto; width: 220px; text-align: center; border: 1px solid #ddd; padding: 10px; border-radius: 8px; display: inline-block; }
-    .qr-container p { margin: 10px 0 0 0; font-weight: bold; font-size: 1.1em; }
+    .qr-container { margin: 15px auto; width: 420px; text-align: center; border: 1px solid #ddd; padding: 10px; border-radius: 8px; display: inline-block; }
+    .qr-container p { margin: 10px 0 0 0; font-weight: bold; font-size: 1.2em; word-wrap: break-word; }
     @media (max-width: 480px) {
-      .qr-container { width: 90%; max-width: 250px; margin-bottom: 15px; }
+      .qr-container { width: 90%; max-width: 420px; margin-bottom: 15px; }
     }
   </style>
 </head>
@@ -63,8 +63,8 @@
 
         const qr = new QRCode(qrDiv, {
           text: encodeURIComponent(name),
-          width: 200,
-          height: 200,
+          width: 400,
+          height: 400,
           correctLevel: QRCode.CorrectLevel.H
         });
 
@@ -92,7 +92,7 @@
           mailBtn.textContent = "Mail Aç";
           mailBtn.onclick = () => {
             const subject = encodeURIComponent("QR Kodunuz");
-            const body = encodeURIComponent(`Merhaba ${name},\nLütfen eklediğim QR kodunu mailinize ekleyin.`);
+            const body = encodeURIComponent(`Merhaba ${name},\nLütfen indirdiğiniz QR kodunu mailinize ekleyin.`);
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
           };
           container.appendChild(mailBtn);
