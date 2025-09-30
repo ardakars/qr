@@ -3,22 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <title>QR İsim Kontrol</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    #qrcode { margin: 20px auto; }
-    #reader { width: 300px; margin: 20px auto; display: none; }
-    .ok { color: green; font-weight: bold; }
-    .warning { color: orange; font-weight: bold; }
-    .error { color: red; font-weight: bold; }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; margin:0; }
+    select, button { font-size: 1.2em; padding: 10px 15px; margin: 5px; border-radius: 8px; border: 1px solid #ccc; }
+    #qrcode { margin: 20px auto; width: 90%; max-width: 300px; }
+    #reader { width: 90%; max-width: 350px; margin: 20px auto; display: none; }
+    .ok { color: green; font-weight: bold; font-size: 1.2em; }
+    .warning { color: orange; font-weight: bold; font-size: 1.2em; }
+    .error { color: red; font-weight: bold; font-size: 1.2em; }
+    @media (max-width: 480px) {
+      select, button { width: 90%; font-size: 1.4em; }
+      #qrcode { max-width: 250px; }
+      #reader { max-width: 300px; }
+    }
   </style>
 </head>
 <body>
   <h2>QR Kod Üret ve Kontrol Et</h2>
 
   <div>
-    <label>İsim seç:</label>
+    <label>İsim seç:</label><br>
     <select id="nameSelect"></select>
     <button onclick="generateQR()">QR Üret</button>
   </div>
@@ -31,7 +38,7 @@
   <p id="result"></p>
 
   <script>
-    // --- 1. İsim Listesi ---
+    // --- İsim Listesi ---
     const names = ["Ahmet", "Mehmet", "Ayşe", "Fatma"];
     const nameSelect = document.getElementById("nameSelect");
     names.forEach(n => {
@@ -41,7 +48,7 @@
       nameSelect.appendChild(opt);
     });
 
-    // --- 2. QR Kod Üretme ---
+    // --- QR Kod Üretme ---
     function generateQR() {
       const name = nameSelect.value;
       document.getElementById("qrcode").innerHTML = "";
@@ -52,10 +59,10 @@
       });
     }
 
-    // --- 3. LocalStorage ile okutma sayıları ---
+    // --- LocalStorage ile okutma sayıları ---
     let readCounts = JSON.parse(localStorage.getItem("readCounts")) || {};
 
-    // --- 4. QR Okuma ---
+    // --- QR Okuma ---
     let html5QrCode;
     function startScanner() {
       const reader = document.getElementById("reader");
