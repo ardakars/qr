@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>QR İsimmm Kontrol</title>
+  <title>QR İsim Kontrol</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
@@ -10,11 +10,12 @@
     #qrcode { margin: 20px auto; }
     #reader { width: 300px; margin: 20px auto; display: none; }
     .ok { color: green; font-weight: bold; }
+    .warning { color: orange; font-weight: bold; }
     .error { color: red; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h2>QR Kod Üret veeee Kontrol Et</h2>
+  <h2>QR Kod Üret ve Kontrol Et</h2>
 
   <div>
     <label>İsim seç:</label>
@@ -29,10 +30,8 @@
   <div id="reader"></div>
   <p id="result"></p>
 
-  <p>Toplam okuma: <span id="scanCount">0</span></p>
-
   <script>
-    // --- İsim Listesi ---
+    // --- 1. İsim Listesi ---
     const names = ["Ahmet", "Mehmet", "Ayşe", "Fatma"];
     const nameSelect = document.getElementById("nameSelect");
     names.forEach(n => {
@@ -42,7 +41,7 @@
       nameSelect.appendChild(opt);
     });
 
-    // --- QR Kod Üretme ---
+    // --- 2. QR Kod Üretme ---
     function generateQR() {
       const name = nameSelect.value;
       document.getElementById("qrcode").innerHTML = "";
@@ -53,47 +52,40 @@
       });
     }
 
-    // --- Sayaç ---
-    let scanCounter = parseInt(localStorage.getItem("scanCounter")) || 0;
-    document.getElementById("scanCount").textContent = scanCounter;
+    // --- 3. LocalStorage ile okutma sayıları ---
+    let readCounts = JSON.parse(localStorage.getItem("readCounts")) || {};
 
-    // --- QR Okuma ---
+    // --- 4. QR Okuma ---
     let html5QrCode;
     function startScanner() {
       const reader = document.getElementById("reader");
       reader.style.display = "block";
       if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length) {
-          const cameraId = devices.length > 1 ? devices[1].id : devices[0].id;
+      html5QrCode.start(
+        { facingMode: "environment" }, // sadece arka kamera
+        { fps: 10, qrbox: 250 },
+        decodedText => {
+          const resultEl = document.getElementById("result");
 
-          html5QrCode.start(
-  { facingMode: "environment" }, // ← sadece arka kamera
-  { fps: 10, qrbox: 250 },
-  decodedText => {
-    const resultEl = document.getElementById("result");
-    if (names.includes(decodedText)) {
-      resultEl.innerHTML = `<span class="ok">✅ ${decodedText} listede var</span>`;
-    } else {
-      resultEl.innerHTML = `<span class="error">⚠️ ${decodedText} listede yok</span>`;
-    }
+          if (!names.includes(decodedText)) {
+            resultEl.innerHTML = `<span class="error">⚠️ ${decodedText} listede yok</span>`;
+          } else {
+            readCounts[decodedText] = (readCounts[decodedText] || 0) + 1;
+            localStorage.setItem("readCounts", JSON.stringify(readCounts));
 
-    // Sayaç arttır ve kaydet
-    scanCounter++;
-    localStorage.setItem("scanCounter", scanCounter);
-    document.getElementById("scanCount").textContent = scanCounter;
+            if (readCounts[decodedText] === 1) {
+              resultEl.innerHTML = `<span class="ok">✅ ${decodedText} listede var</span>`;
+            } else {
+              resultEl.innerHTML = `<span class="warning">⚠️ ${decodedText}'in ${readCounts[decodedText]}. okutuşu</span>`;
+            }
+          }
 
-    html5QrCode.stop();
-  },
-  error => { /* sessiz geç */ }
-);
-
-        }
-      });
+          html5QrCode.stop();
+        },
+        error => { /* sessiz geç */ }
+      );
     }
   </script>
 </body>
 </html>
-
-
