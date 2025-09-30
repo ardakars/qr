@@ -11,9 +11,7 @@
     .ok { color: green; font-weight: bold; font-size: 1.2em; }
     .warning { color: orange; font-weight: bold; font-size: 1.2em; }
     .error { color: red; font-weight: bold; font-size: 1.2em; }
-    @media (max-width: 480px) {
-      #reader { max-width: 300px; }
-    }
+    @media (max-width: 480px) { #reader { max-width: 300px; } }
   </style>
 </head>
 <body>
@@ -30,12 +28,9 @@
         names = text.split('\n').map(s => s.trim()).filter(s => s.length>0);
       });
 
-    // Okutma sayısını tutan nesne
     let readCounts = JSON.parse(localStorage.getItem("readCounts")) || {};
-    let html5QrCode;
-
-    // Okutanlar listesi için anahtar
     const OKUTAN_KEY = 'okutanlarListesi';
+    let html5QrCode;
 
     function startScanner() {
       const reader = document.getElementById("reader");
