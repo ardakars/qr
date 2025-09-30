@@ -5,9 +5,11 @@
   <title>Toplu QR ve Mail Hazırlama</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 20px; margin: 0; }
-    button { font-size: 1em; padding: 5px 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; }
+    button { font-size: 1em; padding: 5px 10px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; }
     .qr-container { margin: 15px auto; width: 220px; text-align: center; border: 1px solid #ddd; padding: 10px; border-radius: 8px; display: inline-block; }
     .qr-container p { margin: 10px 0 0 0; font-weight: bold; font-size: 1.1em; }
     @media (max-width: 480px) {
@@ -18,12 +20,14 @@
 <body>
   <h2>Toplu QR ve Mail Hazırlama</h2>
   <button id="generateBtn" disabled>Tüm QR’ları Üret</button>
+  <button id="downloadAllBtn" disabled>Tüm QR’ları ZIP olarak indir</button>
 
   <div id="qrList"></div>
 
   <script>
     let names = [];
     let emails = [];
+    let qrCanvases = [];
 
     fetch('names.txt')
       .then(res => res.text())
@@ -42,6 +46,7 @@
     function generateAllQR() {
       const qrListDiv = document.getElementById("qrList");
       qrListDiv.innerHTML = "";
+      qrCanvases = [];
 
       names.forEach((name, idx) => {
         const email = emails[idx];
@@ -56,7 +61,6 @@
         p.textContent = name;
         container.appendChild(p);
 
-        // QR oluştur
         const qr = new QRCode(qrDiv, {
           text: encodeURIComponent(name),
           width: 200,
@@ -95,10 +99,34 @@
         }
 
         qrListDiv.appendChild(container);
+
+        // Canvas veya img kaydet
+        setTimeout(() => { // QRCode kütüphanesi biraz zaman alıyor
+          const imgOrCanvas = qrDiv.querySelector('img') || qrDiv.querySelector('canvas');
+          qrCanvases.push({name: name.replace(/\s+/g,'_'), el: imgOrCanvas});
+          document.getElementById('downloadAllBtn').disabled = false;
+        }, 100);
       });
     }
 
     document.getElementById('generateBtn').addEventListener('click', generateAllQR);
+
+    document.getElementById('downloadAllBtn').addEventListener('click', () => {
+      const zip = new JSZip();
+      qrCanvases.forEach(item => {
+        let dataURL;
+        if(item.el.tagName === 'IMG') {
+          dataURL = item.el.src;
+        } else {
+          dataURL = item.el.toDataURL("image/png");
+        }
+        const base64 = dataURL.split(',')[1];
+        zip.file(item.name + '.png', base64, {base64: true});
+      });
+      zip.generateAsync({type:"blob"}).then(function(content) {
+        saveAs(content, "QR_Codes.zip");
+      });
+    });
   </script>
 </body>
 </html>
