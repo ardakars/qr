@@ -69,29 +69,31 @@
           const cameraId = devices.length > 1 ? devices[1].id : devices[0].id;
 
           html5QrCode.start(
-            { deviceId: { exact: cameraId } },
-            { fps: 10, qrbox: 250 },
-            decodedText => {
-              const resultEl = document.getElementById("result");
-              if (names.includes(decodedText)) {
-                resultEl.innerHTML = `<span class="ok">✅ ${decodedText} listede var</span>`;
-              } else {
-                resultEl.innerHTML = `<span class="error">⚠️ ${decodedText} listede yok</span>`;
-              }
+  { facingMode: "environment" }, // ← sadece arka kamera
+  { fps: 10, qrbox: 250 },
+  decodedText => {
+    const resultEl = document.getElementById("result");
+    if (names.includes(decodedText)) {
+      resultEl.innerHTML = `<span class="ok">✅ ${decodedText} listede var</span>`;
+    } else {
+      resultEl.innerHTML = `<span class="error">⚠️ ${decodedText} listede yok</span>`;
+    }
 
-              // Sayaç arttır ve localStorage kaydet
-              scanCounter++;
-              localStorage.setItem("scanCounter", scanCounter);
-              document.getElementById("scanCount").textContent = scanCounter;
+    // Sayaç arttır ve kaydet
+    scanCounter++;
+    localStorage.setItem("scanCounter", scanCounter);
+    document.getElementById("scanCount").textContent = scanCounter;
 
-              html5QrCode.stop();
-            },
-            error => { /* sessiz geç */ }
-          );
+    html5QrCode.stop();
+  },
+  error => { /* sessiz geç */ }
+);
+
         }
       });
     }
   </script>
 </body>
 </html>
+
 
