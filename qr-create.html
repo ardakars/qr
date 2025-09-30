@@ -7,50 +7,45 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 20px; margin: 0; }
-    textarea { width: 90%; max-width: 400px; height: 80px; font-size: 1.1em; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
     button { font-size: 1.2em; padding: 10px 20px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; cursor: pointer; }
     .qr-container { margin: 15px auto; width: 220px; text-align: center; border: 1px solid #ddd; padding: 10px; border-radius: 8px; display: inline-block; }
     .qr-container p { margin: 10px 0 0 0; font-weight: bold; font-size: 1.1em; }
     @media (max-width: 480px) {
-      textarea { width: 95%; }
       .qr-container { width: 90%; max-width: 250px; margin-bottom: 15px; }
     }
   </style>
 </head>
 <body>
   <h2>Toplu QR Üretici</h2>
-  <p>İsim ve soyadları aralarında virgül ile yazın:</p>
-  <textarea id="namesInput" placeholder="Ahmet GG, Mehmet XXX, Murat UUU"></textarea><br>
   <button onclick="generateAllQR()">Tüm QR’ları Üret</button>
 
   <div id="qrList"></div>
 
   <script>
+    let names = [];
+    fetch('names.txt')
+      .then(response => response.text())
+      .then(text => {
+        names = text.split('\n').map(s => s.trim()).filter(s => s.length>0);
+      });
+
     function generateAllQR() {
-      const input = document.getElementById("namesInput").value;
       const qrListDiv = document.getElementById("qrList");
       qrListDiv.innerHTML = "";
 
-      if (!input) return;
+      if (!names.length) return;
 
-      // Virgülle ayrılmış isimleri al, baş ve sondaki boşlukları temizle
-      const items = input.split(",").map(s => s.trim()).filter(s => s.length > 0);
-
-      items.forEach(name => {
-        // QR container div
+      names.forEach(name => {
         const container = document.createElement("div");
         container.className = "qr-container";
 
-        // QR kodu div
         const qrDiv = document.createElement("div");
         container.appendChild(qrDiv);
 
-        // Ad soyad yazısı
         const p = document.createElement("p");
         p.textContent = name;
         container.appendChild(p);
 
-        // QR üret (Türkçe karakter desteği)
         new QRCode(qrDiv, {
           text: encodeURIComponent(name),
           width: 200,
